@@ -1,6 +1,6 @@
 # Jocatube
  
-![logo](https://github.com/gaserslav/Jocatube/blob/main/frontend/logo.svg)
+![logo](https://github.com/lignjoslav123/Jocatube/blob/master/frontend/logo.svg)
 
 
 ### its video hosting platform
