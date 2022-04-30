@@ -1,0 +1,3 @@
+node insertVideos.js
+
+pause

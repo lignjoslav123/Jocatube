@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title> 
+</head>
+<body>
+    <script>
+       const ip="localhost"
+    </script>
+    <script src="/video.js"></script>
+<style>
+    body{
+        margin: 0;
+        margin: 0;
+    }
+    .header{ 
+        width: 100vw;
+        height: 7vh;
+        background-color: rebeccapurple;
+    }
+    
+    .left{
+        float: left; 
+        height: 93vh; 
+        width: 7vw;
+        background-color: aquamarine;
+    }
+    .vidos{ 
+        position: absolute;
+        top: 7vh;
+        left: 7vw;
+        width: 93vw;
+        height: 93vh; 
+        overflow-y: scroll;
+    }
+    .text{
+        color:black;
+    }
+    a{
+        text-decoration: none;
+        color:black;
+    }
+    .left-izbor{
+        text-align: center;
+        margin-top: 0.4vw;
+        margin-bottom: 0.4vw;
+        font-size: 1vw;
+        transition-property: all;
+        transition-duration: 1s;
+        color:black;
+    }
+    .left-izbor:hover{
+        font-size: 2vw;
+        color:red;
+    }
+    .search{
+        position:absolute;
+        top:1.5vh;
+        height: 4vh;
+        width: 20vw;
+        margin-left: 10vw;
+    }
+
+    .logo{
+
+        height: 7vh;
+        width: 14vh;
+
+    }
+
+</style>
+<div class="header">
+    <object  class="logo" data="/logo.svg"> </object>
+    <input type="search" name="search" class="search">
+</div>
+
+<div class="left">
+    <div class="left-izbor" id="trending">trending</div>
+    <div class="left-izbor" id="news">newest</div>
+    <div class="left-izbor" id="rating">rating</div>
+</div>
+<div class="vidos" id="videos">
+
+
+</div>
+
+<script>
+    async function getVideos(mode,limit,offset){
+       await new Promise(e=>{
+    const sock=new WebSocket(`ws://${ip}:8081`)
+    sock.onopen=()=>{
+        const req= {
+         mode:mode,
+         limit:limit,
+         offset:offset
+     }
+     sock.send(JSON.stringify(req))
+     }
+    sock.onmessage=(mes)=>{
+        const videos=JSON.parse(mes.data) 
+        for(let i=0;i<videos.length;i++){
+            const v=new video()
+            v.setTitleandLink(videos[i].title,`/video/${videos[i].id}`)
+            v.setThumbnail(videos[i].thumbnail)
+            v.setLikes(videos[i].likes)
+            v.setDislikes(videos[i].dislikes)
+            v.setLength(videos[i].length)
+            v.setViews(videos[i].views)
+            v.setData(videos[i].time)
+            panel.appendChild(v.export)
+            sock.close()
+            e()
+        }
+    }
+
+})
+    }
+
+</script>
+
+
+<script> 
+    let mode=1
+    const limit=25 
+    let offset=0
+
+
+
+   const panel= document.getElementById("videos")
+
+   getVideos(mode,limit,offset)
+   panel.onscroll=(e)=>{ 
+        //went to the bottom of the page
+        if(panel.scrollHeight-panel.clientHeight<=panel.scrollTop){
+            offset+=limit
+            getVideos(mode,limit,offset)
+        }
+   }
+
+   document.getElementById('news').onclick=()=>{
+    mode=2
+    offset=0
+    panel.innerHTML=""
+    getVideos(mode,limit,offset)
+   }
+
+   document.getElementById('rating').onclick=()=>{
+    mode=3
+    offset=0
+    panel.innerHTML=""
+    getVideos(mode,limit,offset)
+   }
+   document.getElementById('trending').onclick=()=>{
+    mode=1
+    offset=0
+    panel.innerHTML=""
+    getVideos(mode,limit,offset)
+   }
+
+
+ 
+
+
+</script>
+
+</body>
+</html>

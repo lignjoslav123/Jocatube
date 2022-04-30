@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<style>
+    body{
+        margin: 0;
+        margin: 0;
+    }
+    .header{ 
+        width: 100vw;
+        height: 7vh;
+        background-color: rebeccapurple;
+    }
+    .search{
+        position:absolute;
+        top:1.5vh;
+        height: 4vh;
+        width: 20vw;
+        margin-left: 10vw;
+    }
+
+    .logo{
+        height: 7vh;
+        width: 14vh;
+    }
+
+    .video{
+        width: 50vw;
+        height: 50vh; 
+        border:black 1px solid;
+        margin-left: 10vw;
+        margin-top: 10vh;
+        position: relative;
+    }
+
+    .video-canvas{
+        width: 100%;
+        height: 100%;
+    }
+    .video-range{
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        width: 100%;
+    }
+    .related{
+        position: absolute;
+        right: 0;
+        top: 0;
+        border: 1px solid black;
+        width: 30vw;
+        margin-top: 7vh;
+        height: 93vh;
+    }
+
+</style>
+<div class="header">
+    <object  class="logo" data="/logo.svg"> </object>
+    <input type="search" name="search" class="search">
+</div>
+
+<div class="video">
+    <canvas id="canv" class="video-canvas"> </canvas>
+    <input range="100" id="range" class="video-range" type="range">
+</div>
+
+<div class="related"></div>
+
+<script>
+    let videopath = window.location.pathname
+    videopath=videopath.replace("/video/","")
+    const id=parseInt(videopath) 
+    let v=document.createElement('video')
+    v.src=`/Database/video/${id}`
+    const video=document.getElementById('canv')
+    const graf=video.getContext('2d')
+    const range=document.getElementById('range')
+    video.width=1000
+    video.height=1000 
+    video.onclick=()=>{
+        if(v.paused){
+            v.play()
+        }else{
+            v.pause()
+        }
+    }
+    function render(){
+        graf.drawImage(v,0,0,1000,1000)
+        const procent=v.currentTime/v.duration*100
+        range.value=procent 
+        setTimeout(render,1000/30)
+    }
+    render()
+    range.onchange=()=>{
+        const procent=range.value/100
+        v.currentTime=procent*v.duration 
+    }
+</script>
+    
+</body>
+</html>
