@@ -20,6 +20,7 @@
     .search{
         position:absolute;
         top:1.5vh;
+        left:10vw;
         height: 4vh;
         width: 20vw;
         margin-left: 10vw;
@@ -49,8 +50,9 @@
         left: 0px;
         width: 100%;
     }
-    .related{
+    #related{
         position: absolute;
+        overflow-y: scroll;
         right: 0;
         top: 0;
         border: 1px solid black;
@@ -59,31 +61,156 @@
         height: 93vh;
     }
 
+    .go{
+        position:absolute;
+        top:1.5vh;
+        left:40vw;
+        width: 3vw;
+        height: 4vh;
+        background-image: url("/lupa");
+        background-size: cover;
+    }
+
+    #title{
+        width: 50vw;
+        margin-left: 10vw;
+        text-align: center;
+        font-size: 4vh;
+    }
+    #uploaded{
+        width: 50vw;
+        margin-left: 10vw;
+        text-align: right;
+        color:blue;
+    }
+    #discription{
+        width: 60vw;
+        height: fit-content;
+        border:1px solid black;
+    }
+ 
+
 </style>
 <div class="header">
     <object  class="logo" data="/logo.svg"> </object>
-    <input type="search" name="search" class="search">
+    <form action="/search/" method="get">
+        <input type="search" name="search" class="search">
+        <input type="submit" class="go" value="">
+        </form>
 </div>
 
 <div class="video">
     <canvas id="canv" class="video-canvas"> </canvas>
     <input range="100" id="range" class="video-range" type="range">
 </div>
+<div id="title"></div>
+<div id="uploaded"></div>
+<div id="length"></div>
+<div id="likes"></div>
+<div id="dislikes"></div>
+<div id="views"></div>
+<div id="tags"></div>
+<div id="discription"></div>
 
-<div class="related"></div>
+<div id="related"></div>
 
+<script src="/video.js"></script>
+
+<!--Related videos -->
+<script> 
+    const videoID=parseInt(window.location.pathname.replace('/video/','')) 
+    const related=document.getElementById('related')
+
+    //adding title,likes,dislikes,views etc on page
+    function writeInfo(){
+    const socket=new WebSocket('ws://localhost:8081')
+    const req= {
+         mode:0,
+         id:videoID
+     }
+    socket.onopen=()=>{
+        socket.send(JSON.stringify(req))
+    }
+    socket.onmessage=(mes)=>{
+    const message=JSON.parse(mes.data) 
+    document.getElementById('title').innerHTML=message.title
+    document.getElementById('likes').innerHTML="likes :"+message.likes
+    document.getElementById('dislikes').innerHTML="dislikes :"+message.dislikes
+    document.getElementById('views').innerHTML="views :"+message.views
+    document.getElementById('discription').innerHTML=message.description
+    document.getElementById('tags').innerHTML="tags :"+message.tags
+    document.getElementById('uploaded').innerHTML=message.uploaded
+    document.getElementById('length').innerHTML="length :"+message.length
+    
+    document.title=message.title
+    }
+    }
+
+    //related videos
+    function relatedVideos(){
+        const socket=new WebSocket('ws://localhost:8081')
+        
+    const req= {
+         mode:4,
+         id:videoID,
+         offset:0,
+         limit:10
+     }
+    socket.onopen=()=>{
+        socket.send(JSON.stringify(req))
+    }
+    socket.onmessage=(mes)=>{
+    const videos=JSON.parse(mes.data) 
+
+    for(i in videos){
+
+        const v=new video()
+            v.setTitleandLink(videos[i].title,`/video/${videos[i].id}`)
+            v.setThumbnail(videos[i].thumbnail)
+            v.setLikes(videos[i].likes)
+            v.setDislikes(videos[i].dislikes)
+            v.setLength(videos[i].length)
+            v.setViews(videos[i].views)
+            v.setData(videos[i].time)
+            related.appendChild(v.export) 
+        
+    } 
+
+    }
+
+    }
+
+    writeInfo()
+    relatedVideos()
+</script>
+
+<!--Add view to database-->
 <script>
+        const socket=new WebSocket('ws://localhost:8081')
+        const req= {
+             mode:6,
+             id:videoID
+         }
+        socket.onopen=()=>{
+            socket.send(JSON.stringify(req))
+        }
+</script>
+
+
+<!--VIDEO PLAYER-->
+<script>
+    const framerate=60
     let videopath = window.location.pathname
     videopath=videopath.replace("/video/","")
     const id=parseInt(videopath) 
     let v=document.createElement('video')
     v.src=`/Database/video/${id}`
-    const video=document.getElementById('canv')
-    const graf=video.getContext('2d')
+    const videoCanv=document.getElementById('canv')
+    const graf=videoCanv.getContext('2d')
     const range=document.getElementById('range')
-    video.width=1000
-    video.height=1000 
-    video.onclick=()=>{
+    videoCanv.width=1000
+    videoCanv.height=1000 
+    videoCanv.onclick=()=>{
         if(v.paused){
             v.play()
         }else{
@@ -94,7 +221,7 @@
         graf.drawImage(v,0,0,1000,1000)
         const procent=v.currentTime/v.duration*100
         range.value=procent 
-        setTimeout(render,1000/30)
+        setTimeout(render,1000/framerate)
     }
     render()
     range.onchange=()=>{
@@ -102,6 +229,7 @@
         v.currentTime=procent*v.duration 
     }
 </script>
+
     
 </body>
 </html>
