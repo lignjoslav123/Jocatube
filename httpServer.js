@@ -65,6 +65,7 @@ app.get('/video/:id',(req,res)=>{
     }
     res.writeHead(200,headers)
     res.write(data)
+    res.end()
   })
 })
 app.get('/favicon.ico',(req,res)=>{
@@ -75,6 +76,7 @@ app.get('/favicon.ico',(req,res)=>{
     }
     res.writeHead(200,headers)
     res.write(data)
+    res.end()
   })
 })
 
@@ -86,8 +88,27 @@ fs.readFile('./frontend/logo.svg',(err,data)=>{
     }
     res.writeHead(200,headers)
     res.write(data)
+    res.end()
   })
 })
+
+  app.get('/lupa',(req,res)=>{
+    fs.readFile('./frontend/lupa.png',(err,data)=>{
+      const headers = {
+        "Content-Length": data.length,
+        "Content-Type": "image/png",
+      }
+      res.writeHead(200,headers)
+      res.write(data)
+      res.end()
+    })
+  })
+
+  app.get('/search',(req,res)=>{
+
+    console.log(req.query.search)
+
+  })
 
   app.get('/Database/video/:id',(req,res)=>{
     const id=parseInt(req.params.id)
