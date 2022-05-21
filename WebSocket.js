@@ -1,4 +1,4 @@
-const {getVideosbyPopularity,getVideosbyViews,getVideosbyUploadDate, getRelatedVideos,getVideoInfoByID}=require('./database')
+const {addView,getVideosbyPopularity,getVideosbyViews,getVideosbyUploadDate, getRelatedVideos,getVideoInfoByID}=require('./database')
 const timeout=20*60*1000
 const port=8081
 async function handleMassage(massage,socket){
@@ -17,6 +17,10 @@ async function handleMassage(massage,socket){
     2: get videos by date(from newest to oldest)
     3: get videos by rating(form best like/dislike ratio to worst)
     4: get releted videos (get releted videos to video client is watching right now) 
+    5: get videos by search(first videos with simular title and tags then description)
+    6: add view
+    7: add likes 
+    8: add dislike
      */ 
     const mode=massage.mode
     const limit=massage.limit
@@ -27,6 +31,8 @@ async function handleMassage(massage,socket){
         case 2: const videos=await getVideosbyUploadDate(limit,offset);console.log("uzet iz baze"); socket.send(JSON.stringify(videos)); break;
         case 3: const videos1=await getVideosbyPopularity(limit,offset);console.log("uzet iz baze");socket.send(JSON.stringify(videos1)); break;
         case 4: socket.send(JSON.stringify(await getRelatedVideos(massage.id,limit,offset)));break;
+        case 5://when you want to search 
+        case 6: addView(massage.id); break;
     }
 }
 
@@ -39,7 +45,7 @@ server.on('connection',(socket)=>{
         try{
         const massage=JSON.parse(data.toString())
         console.log(massage)
-        handleMassage(massage,socket)
+        handleMassage(massage,socket) 
         }catch(e){
             //wrong request by client
             console.log(`error bad request ${e}`)
