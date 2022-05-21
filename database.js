@@ -265,8 +265,25 @@ async function getRelatedVideos(id,limit,offset){
     return videos;
 }
 
+function addView(id){
+    const sql=`update videos set views=views+1 where id=${id}`
+    con.exec(sql)
+}
+
+function addLike(id){
+    const sql=`update videos set likes=likes+1 where id=${id}`
+    con.exec(sql)
+}
+
+function addDislike(id){
+    const sql=`update videos set dislikes=dislikes+1 where id=${id}`
+    con.exec(sql)
+}
 
 module.exports={
+addView,
+addLike,
+addDislike,
 createVideoTable,
 addVideo,
 video,
